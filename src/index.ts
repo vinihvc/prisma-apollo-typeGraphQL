@@ -1,27 +1,8 @@
-import 'reflect-metadata'
+import { server } from './infra/graphql/server'
+import { GRAPHQL_PORT } from '@config'
 
-import { ApolloServer } from 'apollo-server'
-
-import { buildSchemaSync } from 'type-graphql'
-
-import LoginResolver from './graphql/user'
-
-import { createContext } from './context'
-
-const API_PORT = 4000
-
-const schema = buildSchemaSync({
-  resolvers: [LoginResolver]
-})
-
-const server = new ApolloServer({
-  schema,
-  playground: true,
-  context: createContext
-})
-
-server.listen({ port: API_PORT }, () =>
+server.listen({ port: GRAPHQL_PORT }, () =>
   console.log(
-    `🚀 Server ready at http://localhost:${API_PORT}${server.subscriptionsPath}`
+    `🚀 Server ready at http://localhost:${GRAPHQL_PORT}${server.subscriptionsPath}`
   )
 )
