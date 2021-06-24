@@ -2,33 +2,26 @@ import 'reflect-metadata'
 
 import { ApolloServer } from 'apollo-server'
 
-import { PrismaClient } from '@prisma/client'
-
 import { buildSchemaSync } from 'type-graphql'
 
-import { resolvers } from '@generated/type-graphql'
+import LoginResolver from './graphql/user'
 
-import LoginResolver from './Resolvers/login'
+import { createContext } from './context'
 
-import { authChecker } from './Middleware/auth-checker'
-
-const prisma = new PrismaClient({
-  log: [{ emit: 'event', level: 'query' }]
-})
+const API_PORT = 4000
 
 const schema = buildSchemaSync({
-  resolvers: [...resolvers, LoginResolver],
-  authChecker
+  resolvers: [LoginResolver]
 })
 
 const server = new ApolloServer({
   schema,
   playground: true,
-  context: () => ({ prisma })
+  context: createContext
 })
 
-server.listen({ port: 4000 }, () =>
+server.listen({ port: API_PORT }, () =>
   console.log(
-    `🚀 Server ready at http://localhost:4000${server.subscriptionsPath}`
+    `🚀 Server ready at http://localhost:${API_PORT}${server.subscriptionsPath}`
   )
 )
