@@ -16,6 +16,7 @@
     "removeComments": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
+    "strictPropertyInitialization": false,
     "baseUrl": ".",
     "rootDirs": ["./src"],
     "paths": {
