@@ -1,10 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-
+import { Inject, Service } from 'typedi'
+import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 
-import { compare, hash } from 'bcryptjs'
-import checkToken, { APP_SECRET } from 'src/middlewares/auth'
-import { ContextProps } from 'src/context'
+import { APP_SECRET } from '@config'
 
 type SignInProps = {
   name?: string
@@ -12,8 +11,12 @@ type SignInProps = {
   password: string
 }
 
+@Service()
 class AuthService {
-  constructor(protected prisma: PrismaClient) {}
+  constructor(
+    @Inject('prisma')
+    private readonly prisma: PrismaClient
+  ) {}
 
   async createUser({ name, email, password }: SignInProps) {
     const hashedPassword = await hash(password, 10)
@@ -42,17 +45,14 @@ class AuthService {
       throw new Error('No user found or incorrect password!')
     }
 
-    return sign({ userId: user.id }, APP_SECRET)
+    return sign({ uid: user.id }, APP_SECRET)
   }
 
-  async me(ctx: ContextProps) {
+  async me(userId: number) {
     try {
-      const userId = checkToken(ctx)
-
       const user = await this.prisma.user.findUnique({
-        where: { id: Number(userId) }
+        where: { id: userId }
       })
-
       return user
     } catch (err) {
       throw new Error(err)
