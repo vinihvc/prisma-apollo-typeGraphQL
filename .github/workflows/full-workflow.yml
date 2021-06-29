@@ -43,7 +43,7 @@ jobs:
     - name: Prisma generate
       run: npm run migrate
       env:
-        DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres?schema=public"
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
 
     - name: Run tests unit
       run: npm run test:unit
