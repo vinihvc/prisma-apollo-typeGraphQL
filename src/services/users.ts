@@ -14,6 +14,21 @@ export interface CreateUser {
   acceptTermsAndConditions: boolean
 }
 
+export class EmailAlready extends InternalError {
+  constructor() {
+    super(
+      'There is a unique constraint violation, a new user cannot be created with this email',
+      400
+    )
+  }
+}
+
+export class TermsNotAccpeted extends InternalError {
+  constructor() {
+    super('User must accept terms!', 400)
+  }
+}
+
 @Service()
 class UsersService {
   constructor(
@@ -24,7 +39,7 @@ class UsersService {
 
   async createUser(user: CreateUser) {
     if (!user.acceptTermsAndConditions) {
-      throw new InternalError('User must accept terms!', 400)
+      throw new TermsNotAccpeted()
     }
 
     try {
@@ -44,10 +59,7 @@ class UsersService {
       if (error instanceof PrismaClientKnownRequestError) {
         // See documentation error: https://www.prisma.io/docs/reference/api-reference/error-reference#error-codes
         if (error.code === 'P2002') {
-          throw new InternalError(
-            'There is a unique constraint violation, a new user cannot be created with this email',
-            400
-          )
+          throw new EmailAlready()
         }
       }
 

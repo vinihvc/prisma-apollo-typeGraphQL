@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { mockDeep, mockReset, MockProxy } from 'jest-mock-extended'
 
-import UsersService, { CreateUser } from '@services/users'
+import UsersService, { CreateUser, TermsNotAccpeted } from '@services/users'
 import Email from '@clients/email'
 import prisma from '@elhprisma/client'
 import { InternalError } from '@utils/errors/internal-error'
@@ -60,7 +60,7 @@ describe('UserService', () => {
       acceptTermsAndConditions: false
     }
 
-    expect(userService.createUser(user)).rejects.toThrowError(InternalError)
+    expect(userService.createUser(user)).rejects.toThrowError(TermsNotAccpeted)
   })
 
   test('should be validate send email welcome', async () => {
