@@ -6,6 +6,8 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "createAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updateAt" TIMESTAMP(3) NOT NULL,
+    "acceptTermsAndConditions" BOOLEAN NOT NULL DEFAULT false,
+    "confirmedAt" TIMESTAMP(3) NOT NULL,
 
     PRIMARY KEY ("id")
 );

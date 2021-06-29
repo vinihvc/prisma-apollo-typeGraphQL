@@ -17,9 +17,11 @@
     "baseUrl": ".",
     "rootDirs": ["./src"],
     "paths": {
-      "@generated/*": ["./prisma/generated/*"],
+      "@elhprisma/*": ["./prisma/*"],
       "@services/*": ["./src/services/*"],
-      "@config": ["./src/config/environment.ts"]
+      "@clients/*": ["./src/clients/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@logger": ["./src/logger.ts"]
     },
     "strict": true,
     "esModuleInterop": true,

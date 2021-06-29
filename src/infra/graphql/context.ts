@@ -1,41 +1,38 @@
 import { ExpressContext } from 'apollo-server-express/src/ApolloServer'
-import { verify } from 'jsonwebtoken'
+import { v4 as uuidV4 } from 'uuid'
 
-import { APP_SECRET } from '@config'
-import RoleType from 'src/entities/role-types.enum'
+import AuthService, { JwtToken } from '@services/auth'
+import logger from '@logger'
 
-export type ContextProps = {
+export type Context = {
   requestId: string
-  userId?: number
-  roles: RoleType[]
+  userId?: string
+  roles?: string[]
 }
 
-type TokenProps = {
-  uid: number
-}
-
-export function createContext({ req }: ExpressContext): ContextProps {
-  const requestId =
-    Date.now().toString(36) + Math.random().toString(36).substring(2)
+export function createContext({ req }: ExpressContext): Context {
   const { authorization } = req.headers
-  const roles: RoleType[] = []
-  let userId
+  const requestId = uuidV4()
 
   if (authorization) {
     try {
-      const [, jwt] = authorization.split(' ')
+      const [, token] = authorization.split(' ')
 
-      const token = verify(jwt, APP_SECRET) as TokenProps
+      const { scopes, sub } = AuthService.decodeToken(token) as JwtToken
 
-      userId = token.uid
+      return {
+        userId: sub,
+        roles: scopes,
+        requestId
+      }
     } catch (error) {
+      logger.error(error, 'Falied on validate token in context graphql')
+
       throw new Error('Invalid token')
     }
   }
 
   return {
-    userId,
-    roles,
     requestId
   }
 }

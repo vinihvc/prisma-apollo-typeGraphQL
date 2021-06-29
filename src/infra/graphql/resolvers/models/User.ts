@@ -10,4 +10,7 @@ export class CreateUserInput {
 
   @Field()
   password: string
+
+  @Field()
+  acceptTermsAndConditions: boolean
 }

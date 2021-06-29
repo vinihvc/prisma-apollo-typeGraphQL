@@ -1,8 +1,10 @@
 import { server } from './infra/graphql/server'
-import { GRAPHQL_PORT } from '@config'
+import logger from '@logger'
+import config from 'config'
 
-server.listen({ port: GRAPHQL_PORT }, () =>
-  console.log(
-    `🚀 Server ready at http://localhost:${GRAPHQL_PORT}${server.subscriptionsPath}`
-  )
-)
+const GRAPHQL_PORT = config.get('App.port')
+
+server.listen({ port: GRAPHQL_PORT }).then(({ url, subscriptionsUrl }) => {
+  logger.info(`🚀 Server ready at ${url}`)
+  logger.info(`⏰ Subscriptions ready at ${subscriptionsUrl}`)
+})
