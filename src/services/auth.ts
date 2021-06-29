@@ -1,62 +1,35 @@
-import { PrismaClient } from '@prisma/client'
-import { Inject, Service } from 'typedi'
-import { compare, hash } from 'bcryptjs'
-import { sign } from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import config from 'config'
+import jwt from 'jsonwebtoken'
 
-import { APP_SECRET } from '@config'
-
-type SignInProps = {
-  name?: string
-  email: string
-  password: string
+export interface JwtToken {
+  sub: string
+  scopes: string[]
 }
 
-@Service()
 class AuthService {
-  constructor(
-    @Inject('prisma')
-    private readonly prisma: PrismaClient
-  ) {}
+  public static async hashPassword(
+    password: string,
+    salt = 10
+  ): Promise<string> {
+    return await bcrypt.hash(password, salt)
+  }
 
-  async createUser({ name, email, password }: SignInProps) {
-    const hashedPassword = await hash(password, 10)
+  public static async comparePasswords(
+    password: string,
+    hashedPassword: string
+  ): Promise<boolean> {
+    return await bcrypt.compare(password, hashedPassword)
+  }
 
-    return await this.prisma.user.create({
-      data: {
-        name: name!,
-        email: email,
-        password: hashedPassword
-      }
+  public static generateToken(sub: string, scopes: string[] = []): string {
+    return jwt.sign({ sub, scopes }, config.get('App.auth.key'), {
+      expiresIn: config.get('App.auth.tokenExpiresIn')
     })
   }
 
-  async signIn({ email, password }: SignInProps) {
-    const user = await this.prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (!user) {
-      throw new Error('No user found or incorrect password!')
-    }
-
-    const passwordValid = await compare(password, user.password)
-
-    if (!passwordValid) {
-      throw new Error('No user found or incorrect password!')
-    }
-
-    return sign({ uid: user.id }, APP_SECRET)
-  }
-
-  async me(userId: number) {
-    try {
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId }
-      })
-      return user
-    } catch (err) {
-      throw new Error(err)
-    }
+  public static decodeToken(token: string): JwtToken {
+    return jwt.verify(token, config.get('App.auth.key')) as JwtToken
   }
 }
 

@@ -1,10 +1,7 @@
 import { AuthChecker } from 'type-graphql'
-import { ContextProps } from './context'
+import { Context } from './context'
 
-export const customAuthChecker: AuthChecker<ContextProps> = (
-  { context },
-  roles
-) => {
+export const customAuthChecker: AuthChecker<Context> = ({ context }, roles) => {
   if (roles.length === 0) {
     return context.userId !== undefined
   }

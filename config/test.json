@@ -1,0 +1,11 @@
+{
+  "App": {
+    "database": {
+      "postgresUrl": "postgresql://postgres:postgres@localhost:5432/test?schema=public"
+    },
+    "resources": {},
+    "logger": {
+      "enabled": false
+    }
+  }
+}

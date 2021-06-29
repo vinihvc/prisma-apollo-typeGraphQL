@@ -2,13 +2,12 @@ import 'reflect-metadata'
 import Container from 'typedi'
 import { ApolloServer } from 'apollo-server'
 import { buildSchemaSync } from 'type-graphql'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@elhprisma/client'
 
-import { isDevelopment } from '@config'
 import { createContext } from './context'
 import { customAuthChecker } from './auth-checker'
 
-export const prisma = new PrismaClient()
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
 Container.set({ id: 'prisma', factory: () => prisma })
 
