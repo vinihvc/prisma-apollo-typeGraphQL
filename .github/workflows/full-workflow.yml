@@ -51,4 +51,4 @@ jobs:
     - name: Run tests e2e
       run: npm run migrate && npm run test:e2e
       env:
-        DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres?schema=public"
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
