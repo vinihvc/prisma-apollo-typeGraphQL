@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 
-import { hash } from 'bcryptjs'
+import AuthService from '../src/services/auth'
+
 
 const prisma = new PrismaClient()
 
@@ -12,13 +13,13 @@ async function main() {
       {
         email: 'vinicius@vinicius.com',
         name: 'Vinicius',
-        password: await hash('123', 10)
+        password: await AuthService.hashPassword('123')
       },
 
       {
         email: 'itor@itor.com',
         name: 'Itor',
-        password: await hash('321', 10)
+        password: await AuthService.hashPassword('123')
       }
     ]
   })
