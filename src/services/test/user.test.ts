@@ -1,10 +1,13 @@
 import { PrismaClient } from '@prisma/client'
 import { mockDeep, mockReset, MockProxy } from 'jest-mock-extended'
 
+import { v4 } from 'uuid'
+
 import UsersService, {
   CreateUser,
   EmailAlready,
-  TermsNotAccpeted
+  TermsNotAccpeted,
+  InvalidEmail
 } from '@services/users'
 import Email from '@clients/email'
 import prisma from '@elhprisma/client'
@@ -21,23 +24,23 @@ beforeEach(() => {
   mockReset(prismaMock)
 })
 
-const prismaMock = prisma as unknown as MockProxy<PrismaClient>
+const prismaMock = prisma as MockProxy<PrismaClient>
 const emailServiceMock = new Email() as jest.Mocked<Email>
 
 const userMock = {
-  id: '123',
+  id: v4(),
   email: 'itor@gmail.com',
   name: 'Itor',
   password: '123',
   acceptTermsAndConditions: true,
-  confirmedToken: '123',
+  confirmedToken: v4(),
   createAt: new Date(),
   updateAt: new Date(),
   confirmedAt: new Date()
 }
 
 describe('UserService', () => {
-  test('should be create user and send email', async () => {
+  it('should be create user and send email', async () => {
     prismaMock.user.create.mockResolvedValue(userMock)
 
     const userService = new UsersService(prismaMock, emailServiceMock)
@@ -54,7 +57,7 @@ describe('UserService', () => {
     expect(newUser).toEqual(userMock)
   })
 
-  test('should be validate if user accepted terms', async () => {
+  it('should be valid if user accepted terms', async () => {
     const userService = new UsersService(prismaMock, emailServiceMock)
 
     const user: CreateUser = {
@@ -67,7 +70,7 @@ describe('UserService', () => {
     expect(userService.createUser(user)).rejects.toThrowError(TermsNotAccpeted)
   })
 
-  test('should be validate send email welcome', async () => {
+  it('should be called welcome email', async () => {
     prismaMock.user.create.mockResolvedValue(userMock)
 
     const userService = new UsersService(prismaMock, emailServiceMock)
@@ -84,7 +87,7 @@ describe('UserService', () => {
     expect(emailServiceMock.send).toBeCalledTimes(1)
   })
 
-  test('should be validate email is unique', async () => {
+  it('should validate email is unique', async () => {
     prismaMock.user.create.mockRejectedValue(
       new PrismaClientKnownRequestError('', 'P2002', '')
     )
@@ -103,5 +106,18 @@ describe('UserService', () => {
     }
 
     await expect(action).rejects.toThrowError(EmailAlready)
+  })
+
+  it('should check is a invalid email', () => {
+    const userService = new UsersService(prismaMock, emailServiceMock)
+
+    const user: CreateUser = {
+      email: 'itor@gmail',
+      name: 'Itor',
+      password: '123',
+      acceptTermsAndConditions: true
+    }
+
+    expect(userService.createUser(user)).rejects.toThrowError(InvalidEmail)
   })
 })
