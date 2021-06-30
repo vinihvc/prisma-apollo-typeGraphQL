@@ -1,11 +1,12 @@
 import { PrismaClient, User } from '@prisma/client'
 import { Inject, Service } from 'typedi'
 import config from 'config'
+import validator from 'validator'
 
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { InternalError } from '@utils/errors/internal-error'
 import Email from '@clients/email'
 import AuthService from './auth'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 
 export interface CreateUser {
   name: string
@@ -29,6 +30,12 @@ export class TermsNotAccpeted extends InternalError {
   }
 }
 
+export class InvalidEmail extends InternalError {
+  constructor() {
+    super('Invalid email!', 400)
+  }
+}
+
 @Service()
 class UsersService {
   constructor(
@@ -40,6 +47,10 @@ class UsersService {
   async createUser(user: CreateUser) {
     if (!user.acceptTermsAndConditions) {
       throw new TermsNotAccpeted()
+    }
+
+    if (!validator.isEmail(user.email)) {
+      throw new InvalidEmail()
     }
 
     try {
@@ -57,13 +68,13 @@ class UsersService {
       return newUser
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
-        // See documentation error: https://www.prisma.io/docs/reference/api-reference/error-reference#error-codes
+        // @see documentation error: https://www.prisma.io/docs/reference/api-reference/error-reference#error-codes
         if (error.code === 'P2002') {
           throw new EmailAlready()
         }
       }
 
-      throw new InternalError('Falied on create User', 500)
+      throw new InternalError(error)
     }
   }
 
